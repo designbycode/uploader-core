@@ -1,0 +1,56 @@
+{
+  "name": "@designbycode/uploader-core",
+  "version": "1.0.0",
+  "description": "A framework-agnostic file uploader library with queue management, progress tracking, and abort support",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "keywords": [
+    "uploader",
+    "upload",
+    "file-upload",
+    "browser-upload"
+  ],
+  "license": "MIT",
+  "author": "designbycode",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/designbycode/uploader-core"
+  },
+  "homepage": "https://github.com/designbycode/uploader-core#readme",
+  "bugs": {
+    "url": "https://github.com/designbycode/uploader-core/issues"
+  },
+  "funding": "https://opencollective.com/example",
+  "devDependencies": {
+    "@repo/eslint-config": "*",
+    "@types/bun": "latest",
+    "tsup": "^8.5.1",
+    "vitest": "^4.1.1"
+  },
+  "peerDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
