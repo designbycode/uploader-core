@@ -12,10 +12,11 @@ A framework-agnostic JavaScript file uploader library with queue management, pro
 - **Queue management** — Add multiple files and upload them in sequence or parallel
 - **Progress tracking** — Real-time upload progress via events
 - **Abort support** — Cancel individual uploads or all at once
-- **File validation** — Built-in size and MIME type validation
+- **File validation** — Built-in size and MIME type validation with glob patterns
 - **Custom validators** — Support for async validation functions
 - **Concurrency control** — Limit simultaneous uploads with `maxConcurrent`
-- **Event-driven** — Subscribe to `add`, `progress`, `success`, `error`, `remove` events
+- **Retry logic** — Automatic retry for failed uploads
+- **Event-driven** — Subscribe to `add`, `progress`, `success`, `error`, `remove`, `retry` events
 - **TypeScript** — Full TypeScript support with type definitions
 
 ## Installation
@@ -97,6 +98,8 @@ const uploader = new Uploader({
 | `autoUpload`        | `boolean`                         | Automatically upload files when added              |
 | `maxConcurrent`     | `number`                          | Maximum simultaneous uploads (default: unlimited)  |
 | `validation`        | `ValidationRule \| FileValidator` | File validation rules or custom validator          |
+| `maxRetries`        | `number`                          | Maximum retry attempts for failed uploads          |
+| `retryDelay`        | `number`                          | Delay between retries in ms (default: 1000)        |
 | `process`           | `ProcessFn`                       | Function to handle the actual upload               |
 | `revert`            | `RevertFn`                        | Function to undo upload (e.g., delete from server) |
 | `onAdd`             | `Callback`                        | Called when a file is added                        |
@@ -104,6 +107,7 @@ const uploader = new Uploader({
 | `onSuccess`         | `Callback`                        | Called when upload succeeds                        |
 | `onError`           | `Callback`                        | Called when upload fails                           |
 | `onRemove`          | `Callback`                        | Called when a file is removed                      |
+| `onRetry`           | `Callback`                        | Called when upload is retried                      |
 | `onValidationError` | `Callback`                        | Called when validation fails                       |
 
 ### Methods
@@ -174,6 +178,14 @@ Get a single file by ID.
 const file = uploader.getFile("file-uuid");
 ```
 
+#### `getFileByServerId(serverId: string): UploadFile | undefined`
+
+Get a single file by its server ID (after upload).
+
+```typescript
+const file = uploader.getFileByServerId("server-123");
+```
+
 #### `clear(): void`
 
 Clear all files from the queue.
@@ -219,13 +231,14 @@ uploader.off("success", handler);
 
 ### Event Types
 
-| Event      | Payload      | Description             |
-| ---------- | ------------ | ----------------------- |
-| `add`      | `UploadFile` | File added to queue     |
-| `progress` | `UploadFile` | Upload progress updated |
-| `success`  | `UploadFile` | Upload completed        |
-| `error`    | `UploadFile` | Upload failed           |
-| `remove`   | `UploadFile` | File removed from queue |
+| Event      | Payload                                 | Description             |
+| ---------- | --------------------------------------- | ----------------------- |
+| `add`      | `UploadFile`                            | File added to queue     |
+| `progress` | `UploadFile`                            | Upload progress updated |
+| `success`  | `UploadFile`                            | Upload completed        |
+| `error`    | `UploadFile`                            | Upload failed           |
+| `remove`   | `UploadFile`                            | File removed from queue |
+| `retry`    | `{ file: UploadFile, attempt: number }` | Upload being retried    |
 
 ## Validation
 
@@ -285,6 +298,24 @@ const uploader = new Uploader({
 // Add 10 files, only 2 will upload at once
 await uploader.addFiles(files);
 uploader.uploadAll();
+```
+
+## Retry Logic
+
+Automatically retry failed uploads:
+
+```typescript
+const uploader = new Uploader({
+  maxRetries: 3, // Retry up to 3 times
+  retryDelay: 1000, // Wait 1 second between retries
+  process: async (file, { signal, onProgress }) => {
+    // ...
+  },
+});
+
+uploader.on("retry", ({ file, attempt }) => {
+  console.log(`Retrying ${file.file.name} (attempt ${attempt})`);
+});
 ```
 
 ## Types

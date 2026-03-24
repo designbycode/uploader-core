@@ -276,28 +276,6 @@ export class Uploader {
     this.store.getByStatus("uploading").forEach((f) => this.cancelFile(f.id));
   }
 
-  pauseFile(id: string): void {
-    const file = this.store.get(id);
-    if (!file || file.status !== "uploading") return;
-    file.abortController?.abort();
-    this.store.update(id, { status: "paused" });
-  }
-
-  pauseAll(): void {
-    this.store.getByStatus("uploading").forEach((f) => this.pauseFile(f.id));
-  }
-
-  resumeFile(id: string): void {
-    const file = this.store.get(id);
-    if (!file || file.status !== "paused") return;
-    this.store.update(id, { status: "queued" });
-    this.uploadFile(id);
-  }
-
-  resumeAll(): void {
-    this.store.getByStatus("paused").forEach((f) => this.resumeFile(f.id));
-  }
-
   async removeFile(id: string): Promise<void> {
     const file = this.store.get(id);
     if (!file) return;
